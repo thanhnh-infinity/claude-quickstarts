@@ -1,3 +1,23 @@
+[project]
+name = "claude-quickstarts"
+version = "0.1.0"
+description = "A collection of projects to help developers get started with the Claude API"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.39.0",
+    "mcp>=1.0.0",
+    "python-dotenv>=1.0.0",
+    "nest-asyncio>=1.6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.6.0",
+    "pyright>=1.1.300",
+]
+
 [tool.pyright]
 venvPath = "computer-use-demo"
 venv = ".venv"
