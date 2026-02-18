@@ -11,6 +11,9 @@ import sys
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
+
 from agents.agent import Agent, ModelConfig
 
 
@@ -61,11 +64,11 @@ class TestMessageParams:
             system="You are a helpful assistant. Be very brief.",
             verbose=False
         )
-        
+
         response = agent.run("What is 2+2?")
-        # response is a list of message content blocks
-        assert any("4" in str(block.get("text", "")) for block in response if block.get("type") == "text")
-        response_text = next((block["text"] for block in response if block.get("type") == "text"), "")
+        # response is an Anthropic Message object; content blocks have .type and .text attributes
+        assert any("4" in str(getattr(block, "text", "")) for block in response.content if block.type == "text")
+        response_text = next((block.text for block in response.content if block.type == "text"), "")
         self._print(f"Response: {response_text}")
         
     def test_custom_headers(self) -> None:
@@ -85,9 +88,9 @@ class TestMessageParams:
         # Verify headers are stored
         assert "extra_headers" in agent.message_params
         assert agent.message_params["extra_headers"]["X-Custom-Header"] == "test-value"
-        
+
         response = agent.run("What is 3+3?")
-        response_text = next((block["text"] for block in response if block.get("type") == "text"), "")
+        response_text = next((block.text for block in response.content if block.type == "text"), "")
         assert "6" in response_text
         self._print(f"Response with custom headers: {response_text}")
         
@@ -106,7 +109,7 @@ class TestMessageParams:
         
         # The API call should succeed even with beta headers
         response = agent.run("What is 5*5?")
-        response_text = next((block["text"] for block in response if block.get("type") == "text"), "")
+        response_text = next((block.text for block in response.content if block.type == "text"), "")
         assert "25" in response_text
         self._print(f"Response with beta headers: {response_text}")
         
@@ -124,7 +127,7 @@ class TestMessageParams:
         )
         
         response = agent.run("What is 10/2?")
-        response_text = next((block["text"] for block in response if block.get("type") == "text"), "")
+        response_text = next((block.text for block in response.content if block.type == "text"), "")
         assert "5" in response_text
         self._print(f"Response with metadata: {response_text}")
         
@@ -148,7 +151,7 @@ class TestMessageParams:
         assert params["temperature"] == 0.7
         
         response = agent.run("Say 'test'")
-        response_text = next((block["text"] for block in response if block.get("type") == "text"), "")
+        response_text = next((block.text for block in response.content if block.type == "text"), "")
         assert response_text
         self._print(f"Response with custom params: {response_text}")
         
@@ -223,7 +226,7 @@ class TestMessageParams:
         assert params["top_k"] == 5
         
         response = agent.run("What is 1+1?")
-        response_text = next((block["text"] for block in response if block.get("type") == "text"), "")
+        response_text = next((block.text for block in response.content if block.type == "text"), "")
         assert "2" in response_text
         self._print(f"Response with combined params: {response_text}")
         
